@@ -1,19 +1,9 @@
 plugins {
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 repositories {
     mavenCentral()
-}
-
-javafx {
-    version = "21"
-    modules = ['javafx.controls', 'javafx.fxml']
-}
-
-dependencies {
-    implementation 'org.controlsfx:controlsfx:11.1.2'
 }
 
 application {
