@@ -290,15 +290,30 @@ public class ConnectionManager {
     private boolean setupTunnel() {
         try {
             // Need root for these operations - use pkexec
+            // DNS servers must bypass tunnel (UDP not supported by HTTP proxy)
             String script = String.format(
                 "ip tuntap add mode tun dev %s && " +
                 "ip addr add %s/24 dev %s && " +
                 "ip link set dev %s up && " +
                 "ip route del default 2>/dev/null; " +
+                // Route DNS directly through WiFi (bypass tunnel - UDP not supported)
+                "ip route add 8.8.8.8/32 via %s dev %s && " +
+                "ip route add 8.8.4.4/32 via %s dev %s && " +
+                "ip route add 1.1.1.1/32 via %s dev %s && " +
+                // Backup and set DNS
+                "cp /etc/resolv.conf /etc/resolv.conf.zconnect.bak 2>/dev/null; " +
+                "echo 'nameserver 8.8.8.8' > /etc/resolv.conf && " +
+                "echo 'nameserver 8.8.4.4' >> /etc/resolv.conf && " +
+                // Default routes
                 "ip route add default via %s dev %s metric 1 && " +
                 "ip route add default via %s dev %s metric 10 && " +
                 "sysctl -w net.ipv4.conf.all.rp_filter=0",
                 TUN_DEVICE, TUN_IP, TUN_DEVICE, TUN_DEVICE,
+                // DNS bypass routes
+                PDANET_GATEWAY, wifiInterface,
+                PDANET_GATEWAY, wifiInterface,
+                PDANET_GATEWAY, wifiInterface,
+                // Default routes
                 TUN_IP, TUN_DEVICE,
                 PDANET_GATEWAY, wifiInterface
             );
@@ -398,6 +413,15 @@ public class ConnectionManager {
         try {
             String script =
                 "killall -9 tun2socks 2>/dev/null; " +
+                // Remove DNS bypass routes
+                "ip route del 8.8.8.8/32 2>/dev/null; " +
+                "ip route del 8.8.4.4/32 2>/dev/null; " +
+                "ip route del 1.1.1.1/32 2>/dev/null; " +
+                // Restore DNS
+                "if [ -f /etc/resolv.conf.zconnect.bak ]; then " +
+                "  mv /etc/resolv.conf.zconnect.bak /etc/resolv.conf; " +
+                "fi; " +
+                // Remove tunnel
                 "ip route del default via " + TUN_IP + " dev " + TUN_DEVICE + " 2>/dev/null; " +
                 "ip link set dev " + TUN_DEVICE + " down 2>/dev/null; " +
                 "ip link delete " + TUN_DEVICE + " 2>/dev/null; " +
