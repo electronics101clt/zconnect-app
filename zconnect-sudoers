@@ -1,0 +1,13 @@
+# Z Connect - passwordless sudo for tethering operations
+# Install: sudo cp zconnect-sudoers /etc/sudoers.d/zconnect && sudo chmod 440 /etc/sudoers.d/zconnect
+
+jonathan ALL=(ALL) NOPASSWD: /usr/sbin/ip
+jonathan ALL=(ALL) NOPASSWD: /sbin/ip
+jonathan ALL=(ALL) NOPASSWD: /usr/bin/tun2socks
+jonathan ALL=(ALL) NOPASSWD: /usr/local/bin/tun2socks
+jonathan ALL=(ALL) NOPASSWD: /usr/sbin/sysctl
+jonathan ALL=(ALL) NOPASSWD: /sbin/sysctl
+jonathan ALL=(ALL) NOPASSWD: /usr/bin/killall
+jonathan ALL=(ALL) NOPASSWD: /bin/cp /etc/resolv.conf*
+jonathan ALL=(ALL) NOPASSWD: /bin/mv /etc/resolv.conf*
+jonathan ALL=(ALL) NOPASSWD: /usr/bin/tee /etc/resolv.conf

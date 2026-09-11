@@ -289,7 +289,7 @@ public class ConnectionManager {
 
     private boolean setupTunnel() {
         try {
-            // Need root for these operations - use pkexec
+            // Need root for these operations - use sudo
             // DNS servers must bypass tunnel (UDP not supported by HTTP proxy)
             String script = String.format(
                 "ip tuntap add mode tun dev %s && " +
@@ -318,7 +318,7 @@ public class ConnectionManager {
                 PDANET_GATEWAY, wifiInterface
             );
 
-            ProcessBuilder pb = new ProcessBuilder("pkexec", "bash", "-c", script);
+            ProcessBuilder pb = new ProcessBuilder("sudo", "bash", "-c", script);
             pb.redirectErrorStream(true);
             Process p = pb.start();
 
@@ -344,9 +344,9 @@ public class ConnectionManager {
                 return false;
             }
 
-            // Start tun2socks with pkexec (needs root for TUN)
+            // Start tun2socks with sudo (needs root for TUN)
             ProcessBuilder pb = new ProcessBuilder(
-                "pkexec", "tun2socks",
+                "sudo", "tun2socks",
                 "-device", "tun://" + TUN_DEVICE,
                 "-interface", wifiInterface,
                 "-proxy", "http://" + PDANET_GATEWAY + ":" + PROXY_PORT
@@ -409,7 +409,7 @@ public class ConnectionManager {
             }
         }
 
-        // Cleanup with pkexec
+        // Cleanup with sudo
         try {
             String script =
                 "killall -9 tun2socks 2>/dev/null; " +
@@ -427,7 +427,7 @@ public class ConnectionManager {
                 "ip link delete " + TUN_DEVICE + " 2>/dev/null; " +
                 "sysctl -w net.ipv4.conf.all.rp_filter=1";
 
-            ProcessBuilder pb = new ProcessBuilder("pkexec", "bash", "-c", script);
+            ProcessBuilder pb = new ProcessBuilder("sudo", "bash", "-c", script);
             pb.start().waitFor();
         } catch (Exception e) {
             logger.accept("Cleanup error: " + e.getMessage());
